@@ -4,13 +4,19 @@ import comparing_epsilons
 from bandit import Bandit
 
 
+def ucb(mean, n, nj):
+    if nj == 0:
+        return float('inf')
+    return mean + np.sqrt(2 * np.log(n) / nj)
+
+
 def run_experiment(m1, m2, m3, N, experiment_name):
     bandits = [Bandit(m1), Bandit(m2), Bandit(m3)]
 
     data = np.empty(N)
 
     for i in range(N):
-        j = np.argmax([b.mean for b in bandits])
+        j = np.argmax([ucb(b.mean, i + 1, b.N) for b in bandits])
         x = bandits[j].pull()
         bandits[j].update(x)
 
@@ -31,10 +37,10 @@ if __name__ == '__main__':
     M2 = 2.0
     M3 = 3.0
 
-    oiv = run_experiment(M1, M2, M3, N, 'oiv')
+    oiv = run_experiment(M1, M2, M3, N, 'ucb1')
     ce = comparing_epsilons.run_experiment(M1, M2, M3, 0.01, N, 'comparing_epsilons')
     # log scale plot
-    plt.plot(oiv, label=f'optimistic_initial_values')
+    plt.plot(oiv, label=f'ucb1')
     plt.plot(ce, label=f'comparing_epsilons')
     plt.plot(np.ones(N) * M1)
     plt.plot(np.ones(N) * M2)
