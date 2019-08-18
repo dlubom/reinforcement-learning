@@ -1,6 +1,6 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
+import comparing_epsilons
 
 
 class Bandit:
@@ -17,7 +17,7 @@ class Bandit:
         self.mean = (1 - 1.0 / self.N) * self.mean + 1.0 / self.N * x
 
 
-def run_experiment(m1, m2, m3, eps, N, experiment_name):
+def run_experiment(m1, m2, m3, N, experiment_name):
     bandits = [Bandit(m1), Bandit(m2), Bandit(m3)]
 
     data = np.empty(N)
@@ -31,14 +31,6 @@ def run_experiment(m1, m2, m3, eps, N, experiment_name):
         data[i] = x
     cumulative_average = np.cumsum(data) / (np.arange(N) + 1)
 
-    # # plot moving average ctr
-    # plt.plot(cumulative_average)
-    # plt.plot(np.ones(N) * m1)
-    # plt.plot(np.ones(N) * m2)
-    # plt.plot(np.ones(N) * m3)
-    # plt.xscale('log')
-    # plt.show()
-
     for i, b in enumerate(bandits):
         print(f'{experiment_name}, bandit {i + 1} mean: {b.mean} win: {np.sum(data)}')
 
@@ -48,31 +40,18 @@ def run_experiment(m1, m2, m3, eps, N, experiment_name):
 if __name__ == '__main__':
     N = 100000
 
-    m1 = 1.0
-    m2 = 2.0
-    m3 = 3.0
-    eps1 = 0.1
-    eps2 = 0.05
-    eps3 = 0.01
+    M1 = 1.0
+    M2 = 2.0
+    M3 = 3.0
 
-    exp_1 = run_experiment(m1, m2, m3, eps1, N, f'exp_{eps1}')
-    exp_2 = run_experiment(m1, m2, m3, eps2, N, f'exp_{eps2}')
-    exp_3 = run_experiment(m1, m2, m3, eps3, N, f'exp_{eps3}')
-
+    oiv = run_experiment(M1, M2, M3, N, 'oiv')
+    ce = comparing_epsilons.run_experiment(M1, M2, M3, 0.01, N, 'comparing_epsilons')
     # log scale plot
-    plt.plot(exp_1, label=f'eps = {eps1}')
-    plt.plot(exp_2, label=f'eps = {eps2}')
-    plt.plot(exp_3, label=f'eps = {eps3}')
-    plt.plot(np.ones(N) * m1)
-    plt.plot(np.ones(N) * m2)
-    plt.plot(np.ones(N) * m3)
+    plt.plot(oiv, label=f'optimistic_initial_values')
+    plt.plot(ce, label=f'comparing_epsilons')
+    plt.plot(np.ones(N) * M1)
+    plt.plot(np.ones(N) * M2)
+    plt.plot(np.ones(N) * M3)
     plt.legend()
     plt.xscale('log')
     plt.show()
-
-    # linear plot
-    # plt.plot(exp_1, label=f'eps = {eps1}')
-    # plt.plot(exp_2, label=f'eps = {eps2}')
-    # plt.plot(exp_3, label=f'eps = {eps3}')
-    # plt.legend()
-    # plt.show()
